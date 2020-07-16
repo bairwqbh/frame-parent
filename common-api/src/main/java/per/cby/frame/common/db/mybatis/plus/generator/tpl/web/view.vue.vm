@@ -1,0 +1,108 @@
+<template>
+    <avue-crud :option="option" :data="data" :page="page"
+        :permission="permission" @on-load="loadData"
+        @refresh-change="loadData" @search-change="loadData"
+        @row-save="add" @row-del="del" @row-update="mod">
+        <template v-slot:search>
+            <el-col :md="4">
+                <el-input placeholder="请输入关键字" v-model="param.keyword" clearable/>
+            </el-col>
+        </template>
+    </avue-crud>
+</template>
+
+<script>
+import ${entity}Api from '@/api/${cfg.module}/${entity}Api';
+
+export default {
+    data() {
+        return {
+            data: [],
+            page: {
+                currentPage: 1,
+                pageSize: 10,
+                total: 0,
+            },
+            param: {
+                keyword: null
+            }
+        };
+    },
+    computed: {
+        option() {
+            return {
+                border: true,
+                viewBtn: true,
+                dialogDrag: true,
+                dialogEscape: false,
+                dialogClickModal: false,
+                column: [
+#foreach($field in ${table.fields})
+                    {
+                        label: '${field.comment}',
+                        prop: '${field.propertyName}'
+                    },
+#end
+                ]
+            };
+        },
+        permission() {
+//             return this.$store.getters.getAuthData('ter:commodu');
+            return {
+                addBtn: true,
+                editBtn: true,
+                delBtn: true
+            };
+        }
+    },
+    methods: {
+        loadData(page) {
+            ${entity}Api.page(Object.assign({
+                page: page.currentPage,
+                size: page.pageSize
+            }, this.param)).then(result => {
+                if (result.list) {
+                    this.data = result.list;
+                } else {
+                    this.data = [];
+                }
+                this.page.total = result.total;
+            });
+        },
+        add(row, done, loading) {
+            ${entity}Api.add(row).then(result => {
+                if (result) {
+                    done();
+                    this.$message.success('新增成功！');
+                    this.loadData(this.page);
+                }
+            }).catch(() => loading());
+        },
+        mod(row, index, done, loading) {
+            ${entity}Api.mod(row).then(result => {
+                if (result) {
+                    done();
+                    this.$message.success('修改成功！');
+                    this.loadData(this.page);
+                }
+            }).catch(() => loading());
+        },
+        del(row, index) {
+            this.$confirm('确认删除该记录吗?', {
+                type: 'warning'
+            }).then(() => {
+                ${entity}Api.del(row.id).then(result => {
+                    if (result) {
+                        this.$message.success('删除成功！');
+                        this.loadData(this.page);
+                    }
+                });
+            }).catch(() => {});
+        }
+    }
+}
+</script>
+
+<style scoped>
+
+</style>

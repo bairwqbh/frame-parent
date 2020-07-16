@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="per.cby.frame.common.db.sql.mapper.MySQLMapper">
+    <!-- 删除表 -->
+    <select id="dropTable">
+        DROP TABLE IF EXISTS ${tableName}
+    </select>
+    <!-- 显示表信息 -->
+    <select id="showTable" resultType="java.util.Map">
+        SHOW TABLE STATUS WHERE NAME = #{tableName}
+    </select>
+    <!-- 重命名表 -->
+    <select id="renameTable">
+        RENAME TABLE ${tableName} TO ${newTableName}
+    </select>
+    <!-- 修改表结构 -->
+    <select id="editTable">
+        ALTER TABLE ${tableName}
+        <if test="operation != null">
+            ${operation}
+        </if>
+        <if test="columnName != null">
+            ${columnName}
+        </if>
+        <if test="newColumnName != null and newColumnName != ''">
+            ${newColumnName}
+        </if>
+        <if test="dataType != null">
+            ${dataType}
+        </if>
+        <if test="length != null">
+            (#{length,jdbcType=INTEGER}
+            <if test="decimal != null">
+                ,#{decimal,jdbcType=INTEGER}
+            </if>
+            )
+        </if>
+        <if test="notNull != null">
+            <if test="notNull == 'NO'">
+                NOT
+            </if>
+            NULL
+        </if>
+        <if test="defaultValue != null and defaultValue != ''">
+            DEFAULT ${defaultValue}
+        </if>
+        <if test="comment != null and comment != ''">
+            COMMENT #{comment}
+        </if>
+    </select>
+    <!-- 查询表的列信息 -->
+    <select id="selectColumns" resultType="java.util.Map">
+        SELECT
+            TABLE_CATALOG,
+            TABLE_SCHEMA,
+            TABLE_NAME,
+            COLUMN_NAME,
+            ORDINAL_POSITION,
+            COLUMN_DEFAULT,
+            IS_NULLABLE,
+            DATA_TYPE,
+            CHARACTER_MAXIMUM_LENGTH,
+            CHARACTER_OCTET_LENGTH,
+            NUMERIC_PRECISION,
+            NUMERIC_SCALE,
+            DATETIME_PRECISION,
+            CHARACTER_SET_NAME,
+            COLLATION_NAME,
+            COLUMN_TYPE,
+            COLUMN_KEY,
+            EXTRA,
+            PRIVILEGES,
+            COLUMN_COMMENT
+        FROM
+        INFORMATION_SCHEMA.COLUMNS
+        <where>
+            <if test="tableName != null">
+                AND TABLE_NAME = #{tableName}
+            </if>
+            <if test="notColumns != null and notColumns.length > 0">
+                AND COLUMN_NAME NOT IN
+                <foreach item="item" collection="notColumns" open="("
+                    separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        <trim prefix="ORDER BY" suffix="ASC">
+            ORDINAL_POSITION
+        </trim>
+    </select>
+    <!-- 创建空间要素表 -->
+    <select id="createSpatialTable">
+        CREATE TABLE IF NOT EXISTS ${tableName} (
+            id INT AUTO_INCREMENT COMMENT 'ID',
+            shape GEOMETRY COMMENT '几何',
+            PRIMARY KEY (id),
+            SPATIAL KEY index_spatial_shape (shape)
+        ) COMMENT = #{comment}
+    </select>
+</mapper>

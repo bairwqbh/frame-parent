@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="per.cby.frame.common.db.sql.mapper.Mapper">
+    <!-- 查询 -->
+    <select id="select" resultType="java.util.Map">
+        ${_parameter}
+    </select>
+    <!-- 插入 -->
+    <insert id="insert">
+        ${_parameter}
+    </insert>
+    <!-- 更新 -->
+    <update id="update">
+        ${_parameter}
+    </update>
+    <!--  删除 -->
+    <delete id="delete">
+        ${_parameter}
+    </delete>
+    <!-- 获取当前序列值 -->
+    <select id="currSeq" resultType="java.lang.Integer">
+        SELECT
+        CASE WHEN
+        MAX(CAST(${fieldName} AS SIGNED)) IS NOT NULL
+        THEN
+        MAX(CAST(${fieldName} AS SIGNED)) + 1 ELSE 1 END
+        FROM ${tableName}
+    </select>
+    <!-- 字段值是否已经存在 -->
+    <select id="isExists" resultType="java.lang.Boolean">
+        SELECT
+        CASE WHEN COUNT(1) >= 1
+        THEN TRUE ELSE FALSE END
+        FROM ${tableName}
+        WHERE ${fieldName} = #{value}
+    </select>
+</mapper>
