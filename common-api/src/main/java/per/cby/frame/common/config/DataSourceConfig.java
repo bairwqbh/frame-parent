@@ -88,7 +88,6 @@ public class DataSourceConfig {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean(DynamicDataSource.class)
-    @ConditionalOnClass(DataSourceTransactionManager.class)
     public PlatformTransactionManager transactionManager(DynamicDataSource dynamicDataSource) {
         return new DataSourceTransactionManager(dynamicDataSource);
     }

@@ -27,7 +27,7 @@ public class MessageConfig {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnClass(name = "per.cby.frame.message.RedisVerifyCodeStorage")
+    @ConditionalOnClass(name = "per.cby.frame.redis.cache.RedisDataCache")
     public VerifyDataCache verifyDataCache() {
         return new RedisVerifyCodeStorage();
     }
